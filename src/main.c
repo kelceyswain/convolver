@@ -13,6 +13,33 @@
 #include "splitchans.h"
 #include "normalize.h"
 
+static inline void loadBar(int x, int n, int r, int w)
+{
+    int i;
+    // Only update r times
+    if (x % (n/r) != 0) return;
+
+    // Calculate the ratio of complete-to-incomplete.
+    float ratio = x/(float)n;
+    int c = ratio * w;
+
+    // Show the percentage complete
+    printf("%3d%% [", (int)(ratio*100));
+
+    // Show the load bar
+    for (i=0; i<c; i++)
+    {
+        printf("=");
+    }
+    for (i=c; i<w; i++)
+    {
+        printf(" ");
+    }
+
+    // ANSI Control codes to go back to the previous line and clear it
+    printf("]\n\033[F\033[J");
+}
+
 int main(int argc, char** argv)
 {
     // Initialize the variables
@@ -132,8 +159,10 @@ int main(int argc, char** argv)
 
     for (k = 0; k < props1.channels; k++)
     {
+        printf("Convolving channel %i of %i\n", k+1, props1.channels );
     	for (i = 0; i < props1.frames; i++)
     	{
+            loadBar(i, props1.frames, 100, 100);
     		for ( j = 0; j < props2.frames; j++)
     		{
     			buf3[k][i+j] += buf1[k][i] * buf2[k][j];
